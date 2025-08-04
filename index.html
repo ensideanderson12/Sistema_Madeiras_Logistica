@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Madeiras Logística - Análise Estratégica Curitiba-RJ</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1>🌲 Sistema Madeiras Logística</h1>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+                    <li><a href="#calculadora" class="nav-link">Transparência</a></li>
+                    <li><a href="#logistica" class="nav-link">Logística</a></li>
+                    <li><a href="#comparativo" class="nav-link">Comparativo</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Dashboard Principal -->
+        <section id="dashboard" class="section active">
+            <div class="container">
+                <h2>📊 Dashboard Operação Curitiba → Rio de Janeiro</h2>
+                
+                <div class="operation-header">
+                    <div class="operation-info">
+                        <h3>Análise Estratégica - Rota Mandirituba/PR → Rio Pomba/MG</h3>
+                        <p><strong>CEO:</strong> ensideanderson12 | <strong>Base:</strong> Araçatuba-SP | <strong>Data:</strong> <span id="current-date"></span></p>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>📍 Distância Total</h4>
+                        <span class="metric-value">1.319 km</span>
+                        <p>Rota Sul-Sudeste</p>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h4>🚛 Valor Frete</h4>
+                        <span class="metric-value">R$ 11.000,00</span>
+                        <p>R$ 8,33/km</p>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h4>📦 Volume Total</h4>
+                        <span class="metric-value">52 m³</span>
+                        <p>Pinus Conv. + Seco</p>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h4>💰 Custo/m³</h4>
+                        <span class="metric-value">R$ 211,54</span>
+                        <p>Frete por metro cúbico</p>
+                    </div>
+                </div>
+
+                <div class="products-analysis">
+                    <h3>📋 Análise de Produtos</h3>
+                    <div class="products-grid">
+                        <div class="product-card">
+                            <h4>🌲 Pinus Convencional</h4>
+                            <div class="product-details">
+                                <p><strong>Volume:</strong> 28,000 m³</p>
+                                <p><strong>Dimensões:</strong> 2,0 x 30 x 3,00</p>
+                                <p><strong>Preço:</strong> R$ 1.170,00/m³</p>
+                                <p><strong>Valor Total:</strong> R$ <span id="pinus-conv-total">32.760,00</span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="product-card">
+                            <h4>🌳 Pinus Seco</h4>
+                            <div class="product-details">
+                                <p><strong>Volume:</strong> 24,000 m³</p>
+                                <p><strong>Variações:</strong> 7+7+5+5 m³</p>
+                                <p><strong>Preço:</strong> R$ 950,00/m³</p>
+                                <p><strong>Valor Total:</strong> R$ <span id="pinus-seco-total">22.800,00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transparency-summary">
+                    <h3>🔍 Resumo Transparência Total</h3>
+                    <div class="transparency-grid">
+                        <div class="transparency-item">
+                            <label>Valor Total Produtos:</label>
+                            <span id="total-products">R$ 55.560,00</span>
+                        </div>
+                        <div class="transparency-item">
+                            <label>Custo Logístico:</label>
+                            <span id="total-logistics">R$ 11.000,00</span>
+                        </div>
+                        <div class="transparency-item">
+                            <label>Preço Médio Colocado:</label>
+                            <span id="average-price">R$ 1.280,00/m³</span>
+                        </div>
+                        <div class="transparency-item">
+                            <label>Margem Transparente:</label>
+                            <span id="transparent-margin">15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculadora de Transparência -->
+        <section id="calculadora" class="section">
+            <div class="container">
+                <h2>🧮 Calculadora Transparência Total</h2>
+                <div class="calculator-content">
+                    <!-- Conteúdo será carregado via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulo Logística -->
+        <section id="logistica" class="section">
+            <div class="container">
+                <h2>🚛 Módulo Logística Inteligente</h2>
+                <div class="logistics-content">
+                    <!-- Conteúdo será carregado via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sistema Comparativo -->
+        <section id="comparativo" class="section">
+            <div class="container">
+                <h2>📈 Sistema de Análise Comparativa</h2>
+                <div class="comparative-content">
+                    <!-- Conteúdo será carregado via JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2024 Sistema Madeiras Logística - Modelo Transparência Total + Autonomia do Produtor + Divisão Lucro Excedente</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/calculator.js"></script>
+    <script src="assets/js/logistics.js"></script>
+</body>
+</html>
