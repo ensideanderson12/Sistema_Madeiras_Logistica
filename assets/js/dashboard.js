@@ -1,0 +1,532 @@
+/**
+ * Dashboard JavaScript - Sistema Madeiras Logística
+ * Gerenciamento principal do dashboard e KPIs em tempo real
+ */
+
+class MadeirasLogisticaDashboard {
+    constructor() {
+        this.initializeEventListeners();
+        this.startRealTimeUpdates();
+        this.loadStoredData();
+        this.initializeNotifications();
+    }
+
+    /**
+     * Inicializa todos os event listeners necessários
+     */
+    initializeEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', this.handleNavigation.bind(this));
+        });
+
+        // Responsive navigation toggle
+        this.createMobileNavToggle();
+
+        // Real-time update toggle
+        this.createUpdateToggle();
+
+        // Data export functionality
+        this.initializeExportFeatures();
+
+        // Keyboard shortcuts
+        this.initializeKeyboardShortcuts();
+    }
+
+    /**
+     * Cria toggle para navegação mobile
+     */
+    createMobileNavToggle() {
+        const header = document.querySelector('.dashboard-header .container');
+        const nav = document.querySelector('.dashboard-header nav');
+        
+        if (window.innerWidth <= 768) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.innerHTML = '☰';
+            toggleBtn.className = 'mobile-nav-toggle';
+            toggleBtn.style.cssText = `
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 8px;
+                margin-left: auto;
+                display: block;
+            `;
+            
+            toggleBtn.addEventListener('click', () => {
+                nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+            });
+            
+            header.appendChild(toggleBtn);
+            nav.style.display = 'none';
+        }
+    }
+
+    /**
+     * Gerencia navegação entre seções
+     */
+    handleNavigation(event) {
+        event.preventDefault();
+        const targetSection = event.target.getAttribute('href').substring(1);
+        
+        // Remove active class from all nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        // Add active class to clicked link
+        event.target.classList.add('active');
+        
+        // Show target section
+        this.showSection(targetSection);
+        
+        // Save current section to localStorage
+        localStorage.setItem('currentSection', targetSection);
+    }
+
+    /**
+     * Mostra seção específica e esconde outras
+     */
+    showSection(sectionId) {
+        const sections = ['kpis', 'calculator', 'charts', 'reports', 'settings'];
+        
+        sections.forEach(section => {
+            const element = document.getElementById(section);
+            if (element) {
+                element.style.display = section === sectionId ? 'block' : 'none';
+            }
+        });
+
+        // Special handling for dashboard (shows multiple sections)
+        if (sectionId === 'dashboard') {
+            ['kpis', 'calculator', 'charts'].forEach(section => {
+                const element = document.getElementById(section);
+                if (element) element.style.display = 'block';
+            });
+        }
+    }
+
+    /**
+     * Inicia atualizações em tempo real dos KPIs
+     */
+    startRealTimeUpdates() {
+        this.updateKPIs();
+        
+        // Atualiza a cada 30 segundos
+        this.updateInterval = setInterval(() => {
+            this.updateKPIs();
+        }, 30000);
+    }
+
+    /**
+     * Atualiza valores dos KPIs
+     */
+    updateKPIs() {
+        const kpis = {
+            totalRevenue: this.calculateTotalRevenue(),
+            activeOperations: this.getActiveOperations(),
+            averageROI: this.calculateAverageROI(),
+            fuelCost: this.calculateFuelCost()
+        };
+
+        // Atualiza valores na interface
+        this.updateKPIElement('total-revenue', kpis.totalRevenue, 'currency');
+        this.updateKPIElement('active-operations', kpis.activeOperations, 'number');
+        this.updateKPIElement('average-roi', kpis.averageROI, 'percentage');
+        this.updateKPIElement('fuel-cost', kpis.fuelCost, 'currency');
+
+        // Salva dados históricos
+        this.saveHistoricalData(kpis);
+    }
+
+    /**
+     * Atualiza elemento KPI específico
+     */
+    updateKPIElement(elementId, value, type) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        let formattedValue;
+        switch (type) {
+            case 'currency':
+                formattedValue = this.formatCurrency(value);
+                break;
+            case 'percentage':
+                formattedValue = `${value.toFixed(1)}%`;
+                break;
+            case 'number':
+                formattedValue = value.toString();
+                break;
+            default:
+                formattedValue = value.toString();
+        }
+
+        // Animação de atualização
+        element.style.opacity = '0.5';
+        setTimeout(() => {
+            element.textContent = formattedValue;
+            element.style.opacity = '1';
+        }, 300);
+    }
+
+    /**
+     * Calcula receita total baseada em dados simulados e operações
+     */
+    calculateTotalRevenue() {
+        const baseRevenue = 150000;
+        const variationFactor = 0.1;
+        const randomVariation = (Math.random() - 0.5) * variationFactor;
+        
+        // Simula variação baseada em operações ativas
+        const operations = this.getActiveOperations();
+        const operationMultiplier = 1 + (operations * 0.05);
+        
+        return baseRevenue * operationMultiplier * (1 + randomVariation);
+    }
+
+    /**
+     * Retorna número de operações ativas
+     */
+    getActiveOperations() {
+        // Simula variação entre 8-15 operações
+        const baseOperations = 12;
+        const timeVariation = Math.sin(Date.now() / 1000000) * 3;
+        return Math.max(8, Math.min(15, Math.round(baseOperations + timeVariation)));
+    }
+
+    /**
+     * Calcula ROI médio das operações
+     */
+    calculateAverageROI() {
+        const baseROI = 15.5;
+        const marketVariation = (Math.random() - 0.5) * 5;
+        const fuelImpact = this.getFuelPriceImpact();
+        
+        return Math.max(5, Math.min(25, baseROI + marketVariation - fuelImpact));
+    }
+
+    /**
+     * Calcula custo total de combustível
+     */
+    calculateFuelCost() {
+        const baseCost = 45000;
+        const fuelPriceIndex = this.getCurrentFuelPrice();
+        const operationsMultiplier = this.getActiveOperations() / 12;
+        
+        return baseCost * fuelPriceIndex * operationsMultiplier;
+    }
+
+    /**
+     * Obtém preço atual do combustível (simulado)
+     */
+    getCurrentFuelPrice() {
+        // Simula variação de preço de combustível
+        const basePrice = 5.50;
+        const seasonalVariation = Math.sin((Date.now() / (1000 * 60 * 60 * 24)) * 2 * Math.PI / 365) * 0.3;
+        const marketVariation = (Math.random() - 0.5) * 0.2;
+        
+        return Math.max(4.8, Math.min(6.5, basePrice + seasonalVariation + marketVariation));
+    }
+
+    /**
+     * Calcula impacto do preço do combustível no ROI
+     */
+    getFuelPriceImpact() {
+        const currentPrice = this.getCurrentFuelPrice();
+        const baselinePrice = 5.50;
+        return (currentPrice - baselinePrice) * 2; // 2% ROI impact per R$0.10 fuel price change
+    }
+
+    /**
+     * Formata valor monetário
+     */
+    formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    }
+
+    /**
+     * Salva dados históricos no localStorage
+     */
+    saveHistoricalData(kpis) {
+        const timestamp = new Date().toISOString();
+        const historicalData = JSON.parse(localStorage.getItem('kpiHistory') || '[]');
+        
+        historicalData.push({
+            timestamp,
+            ...kpis
+        });
+
+        // Mantém apenas últimos 100 registros
+        if (historicalData.length > 100) {
+            historicalData.splice(0, historicalData.length - 100);
+        }
+
+        localStorage.setItem('kpiHistory', JSON.stringify(historicalData));
+    }
+
+    /**
+     * Carrega dados salvos do localStorage
+     */
+    loadStoredData() {
+        const currentSection = localStorage.getItem('currentSection');
+        if (currentSection) {
+            this.showSection(currentSection);
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${currentSection}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Carrega configurações de usuário
+        const userPreferences = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+        this.applyUserPreferences(userPreferences);
+    }
+
+    /**
+     * Aplica preferências do usuário
+     */
+    applyUserPreferences(preferences) {
+        if (preferences.theme) {
+            document.body.setAttribute('data-theme', preferences.theme);
+        }
+        
+        if (preferences.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = setInterval(() => {
+                this.updateKPIs();
+            }, preferences.updateInterval * 1000);
+        }
+    }
+
+    /**
+     * Cria toggle para pausar/retomar atualizações
+     */
+    createUpdateToggle() {
+        const toggle = document.createElement('button');
+        toggle.innerHTML = '⏸️ Pausar Atualizações';
+        toggle.className = 'update-toggle';
+        toggle.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 0.9rem;
+        `;
+
+        let isPaused = false;
+        toggle.addEventListener('click', () => {
+            if (isPaused) {
+                this.startRealTimeUpdates();
+                toggle.innerHTML = '⏸️ Pausar Atualizações';
+                isPaused = false;
+            } else {
+                clearInterval(this.updateInterval);
+                toggle.innerHTML = '▶️ Retomar Atualizações';
+                isPaused = true;
+            }
+        });
+
+        document.body.appendChild(toggle);
+    }
+
+    /**
+     * Inicializa recursos de exportação
+     */
+    initializeExportFeatures() {
+        // Exportar dados como CSV
+        window.exportKPIData = () => {
+            const historicalData = JSON.parse(localStorage.getItem('kpiHistory') || '[]');
+            const csvContent = this.convertToCSV(historicalData);
+            this.downloadFile(csvContent, 'kpi-data.csv', 'text/csv');
+        };
+
+        // Exportar dashboard como PDF (simulado)
+        window.exportDashboardPDF = () => {
+            window.print();
+        };
+    }
+
+    /**
+     * Converte dados para formato CSV
+     */
+    convertToCSV(data) {
+        if (data.length === 0) return '';
+        
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        data.forEach(row => {
+            const values = headers.map(header => {
+                const value = row[header];
+                return typeof value === 'string' ? `"${value}"` : value;
+            });
+            csvRows.push(values.join(','));
+        });
+        
+        return csvRows.join('\n');
+    }
+
+    /**
+     * Faz download de arquivo
+     */
+    downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Inicializa atalhos de teclado
+     */
+    initializeKeyboardShortcuts() {
+        document.addEventListener('keydown', (event) => {
+            // Ctrl + número para navegar entre seções
+            if (event.ctrlKey && event.key >= '1' && event.key <= '4') {
+                event.preventDefault();
+                const sections = ['dashboard', 'calculator', 'reports', 'settings'];
+                const sectionIndex = parseInt(event.key) - 1;
+                if (sections[sectionIndex]) {
+                    this.showSection(sections[sectionIndex]);
+                }
+            }
+            
+            // Ctrl + R para atualizar KPIs
+            if (event.ctrlKey && event.key === 'r') {
+                event.preventDefault();
+                this.updateKPIs();
+                this.showNotification('KPIs atualizados!', 'success');
+            }
+            
+            // Ctrl + E para exportar dados
+            if (event.ctrlKey && event.key === 'e') {
+                event.preventDefault();
+                window.exportKPIData();
+            }
+        });
+    }
+
+    /**
+     * Inicializa sistema de notificações
+     */
+    initializeNotifications() {
+        // Criar container de notificações
+        const container = document.createElement('div');
+        container.id = 'notifications-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 300px;
+        `;
+        document.body.appendChild(container);
+    }
+
+    /**
+     * Mostra notificação
+     */
+    showNotification(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('notifications-container');
+        const notification = document.createElement('div');
+        
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            background: var(--${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'}-color);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
+        
+        container.appendChild(notification);
+        
+        // Animar entrada
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Remover após duração especificada
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, duration);
+    }
+
+    /**
+     * Monitora alertas de mercado
+     */
+    startMarketAlerts() {
+        setInterval(() => {
+            const fuelPrice = this.getCurrentFuelPrice();
+            const roi = this.calculateAverageROI();
+            
+            // Alerta de preço alto de combustível
+            if (fuelPrice > 6.0) {
+                this.showNotification('⚠️ Preço do combustível elevado: R$ ' + fuelPrice.toFixed(2), 'warning');
+            }
+            
+            // Alerta de ROI baixo
+            if (roi < 10) {
+                this.showNotification('📉 ROI abaixo do esperado: ' + roi.toFixed(1) + '%', 'warning');
+            }
+            
+            // Alerta de oportunidade
+            if (roi > 20) {
+                this.showNotification('🚀 Excelente oportunidade de ROI: ' + roi.toFixed(1) + '%', 'success');
+            }
+        }, 60000); // Verifica a cada minuto
+    }
+}
+
+// Inicializar dashboard quando DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+    const dashboard = new MadeirasLogisticaDashboard();
+    
+    // Iniciar alertas de mercado
+    dashboard.startMarketAlerts();
+    
+    // Expor instância globalmente para debugging
+    window.dashboard = dashboard;
+});
+
+// Service Worker registration para PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/modules/pwa-service-worker.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
