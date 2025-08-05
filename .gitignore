@@ -1,0 +1,40 @@
+# Logs e backups
+logs/
+backup/
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+
+# Cache e dados locais
+*.cache
+.DS_Store
+Thumbs.db
+
+# Dependências (se houver)
+node_modules/
+vendor/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de sistema
+*.log
+*.pid
+
+# Certificados e chaves
+*.pem
+*.key
+*.crt
+
+# Arquivos de configuração local
+config.local.*
+settings.local.*
+
+# Screenshots temporários (manter apenas os da documentação)
+screenshot-*.png
+dashboard-*.png

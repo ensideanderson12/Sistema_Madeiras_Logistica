@@ -1,0 +1,479 @@
+/**
+ * PWA Service Worker - Sistema Madeiras Logística
+ * Implementa funcionalidade offline e cache inteligente
+ */
+
+const CACHE_NAME = 'madeiras-logistica-v1.0.0';
+const STATIC_CACHE_NAME = 'madeiras-static-v1.0.0';
+const DATA_CACHE_NAME = 'madeiras-data-v1.0.0';
+
+// Arquivos para cache estático
+const STATIC_FILES = [
+    '/',
+    '/dashboard.html',
+    '/assets/css/dashboard.css',
+    '/assets/css/responsive.css',
+    '/assets/js/dashboard.js',
+    '/assets/js/calculator.js',
+    '/assets/js/charts.js',
+    '/modules/pwa-service-worker.js',
+    '/modules/ia-otimizacao.js',
+    '/modules/market-integration.js',
+    '/manifest.json'
+];
+
+// Arquivos de dados para cache dinâmico
+const DATA_URLS = [
+    '/api/kpis',
+    '/api/calculations',
+    '/api/market-data',
+    '/api/fuel-prices'
+];
+
+/**
+ * Instalação do Service Worker
+ */
+self.addEventListener('install', (event) => {
+    console.log('[SW] Installing...');
+    
+    event.waitUntil(
+        caches.open(STATIC_CACHE_NAME)
+            .then((cache) => {
+                console.log('[SW] Caching static files');
+                return cache.addAll(STATIC_FILES);
+            })
+            .then(() => {
+                console.log('[SW] Installation complete');
+                return self.skipWaiting();
+            })
+            .catch((error) => {
+                console.error('[SW] Installation failed:', error);
+            })
+    );
+});
+
+/**
+ * Ativação do Service Worker
+ */
+self.addEventListener('activate', (event) => {
+    console.log('[SW] Activating...');
+    
+    event.waitUntil(
+        Promise.all([
+            // Limpar caches antigos
+            cleanupOldCaches(),
+            // Assumir controle de todas as páginas
+            self.clients.claim()
+        ]).then(() => {
+            console.log('[SW] Activation complete');
+        })
+    );
+});
+
+/**
+ * Interceptação de requisições
+ */
+self.addEventListener('fetch', (event) => {
+    const { request } = event;
+    const url = new URL(request.url);
+    
+    // Ignorar requisições não HTTP
+    if (!request.url.startsWith('http')) {
+        return;
+    }
+
+    // Estratégia Cache First para recursos estáticos
+    if (isStaticResource(request)) {
+        event.respondWith(cacheFirstStrategy(request));
+        return;
+    }
+
+    // Estratégia Network First para dados da API
+    if (isAPIRequest(request)) {
+        event.respondWith(networkFirstStrategy(request));
+        return;
+    }
+
+    // Estratégia Stale While Revalidate para outras requisições
+    event.respondWith(staleWhileRevalidateStrategy(request));
+});
+
+/**
+ * Verifica se é um recurso estático
+ */
+function isStaticResource(request) {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    
+    return pathname.endsWith('.css') ||
+           pathname.endsWith('.js') ||
+           pathname.endsWith('.html') ||
+           pathname.endsWith('.ico') ||
+           pathname.endsWith('.png') ||
+           pathname.endsWith('.jpg') ||
+           pathname.endsWith('.jpeg') ||
+           pathname.endsWith('.svg') ||
+           pathname.endsWith('.woff') ||
+           pathname.endsWith('.woff2');
+}
+
+/**
+ * Verifica se é uma requisição de API
+ */
+function isAPIRequest(request) {
+    const url = new URL(request.url);
+    return url.pathname.startsWith('/api/') || 
+           DATA_URLS.some(dataUrl => url.pathname.includes(dataUrl));
+}
+
+/**
+ * Estratégia Cache First - Para recursos estáticos
+ */
+async function cacheFirstStrategy(request) {
+    try {
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+
+        const networkResponse = await fetch(request);
+        
+        // Cache da resposta se for bem-sucedida
+        if (networkResponse.status === 200) {
+            const cache = await caches.open(STATIC_CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.error('[SW] Cache First failed:', error);
+        
+        // Retornar página offline para HTML
+        if (request.destination === 'document') {
+            return caches.match('/offline.html');
+        }
+        
+        throw error;
+    }
+}
+
+/**
+ * Estratégia Network First - Para dados da API
+ */
+async function networkFirstStrategy(request) {
+    try {
+        // Tentar buscar da rede primeiro
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse.status === 200) {
+            // Cache da resposta bem-sucedida
+            const cache = await caches.open(DATA_CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        console.log('[SW] Network failed, trying cache:', error);
+        
+        // Fallback para cache se a rede falhar
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Retornar dados offline padrão
+        return new Response(JSON.stringify({
+            offline: true,
+            message: 'Dados não disponíveis offline',
+            timestamp: new Date().toISOString()
+        }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 200
+        });
+    }
+}
+
+/**
+ * Estratégia Stale While Revalidate - Para outros recursos
+ */
+async function staleWhileRevalidateStrategy(request) {
+    const cache = await caches.open(CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    // Fetch da rede para atualizar cache
+    const networkResponsePromise = fetch(request).then((networkResponse) => {
+        if (networkResponse.status === 200) {
+            cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+    }).catch((error) => {
+        console.log('[SW] Network request failed:', error);
+    });
+    
+    // Retornar cache imediatamente se disponível, senão aguardar rede
+    return cachedResponse || networkResponsePromise;
+}
+
+/**
+ * Limpa caches antigos
+ */
+async function cleanupOldCaches() {
+    const cacheWhitelist = [CACHE_NAME, STATIC_CACHE_NAME, DATA_CACHE_NAME];
+    const cacheNames = await caches.keys();
+    
+    return Promise.all(
+        cacheNames.map((cacheName) => {
+            if (!cacheWhitelist.includes(cacheName)) {
+                console.log('[SW] Deleting old cache:', cacheName);
+                return caches.delete(cacheName);
+            }
+        })
+    );
+}
+
+/**
+ * Sincronização em background
+ */
+self.addEventListener('sync', (event) => {
+    console.log('[SW] Background sync:', event.tag);
+    
+    if (event.tag === 'sync-data') {
+        event.waitUntil(syncData());
+    } else if (event.tag === 'sync-calculations') {
+        event.waitUntil(syncCalculations());
+    }
+});
+
+/**
+ * Sincroniza dados com o servidor
+ */
+async function syncData() {
+    try {
+        console.log('[SW] Syncing data...');
+        
+        // Sincronizar KPIs
+        await syncKPIData();
+        
+        // Sincronizar dados de mercado
+        await syncMarketData();
+        
+        // Sincronizar cálculos pendentes
+        await syncPendingCalculations();
+        
+        console.log('[SW] Data sync complete');
+    } catch (error) {
+        console.error('[SW] Data sync failed:', error);
+    }
+}
+
+/**
+ * Sincroniza dados de KPI
+ */
+async function syncKPIData() {
+    try {
+        const response = await fetch('/api/kpis');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Armazenar no IndexedDB ou localStorage via message
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({
+                        type: 'KPI_UPDATE',
+                        data: data
+                    });
+                });
+            });
+        }
+    } catch (error) {
+        console.error('[SW] KPI sync failed:', error);
+    }
+}
+
+/**
+ * Sincroniza dados de mercado
+ */
+async function syncMarketData() {
+    try {
+        const response = await fetch('/api/market-data');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Notificar clientes sobre atualização
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({
+                        type: 'MARKET_UPDATE',
+                        data: data
+                    });
+                });
+            });
+        }
+    } catch (error) {
+        console.error('[SW] Market data sync failed:', error);
+    }
+}
+
+/**
+ * Sincroniza cálculos pendentes
+ */
+async function syncPendingCalculations() {
+    try {
+        // Buscar cálculos pendentes do storage local
+        const pendingCalculations = await getPendingCalculations();
+        
+        for (const calculation of pendingCalculations) {
+            try {
+                const response = await fetch('/api/calculations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(calculation)
+                });
+                
+                if (response.ok) {
+                    await removePendingCalculation(calculation.id);
+                }
+            } catch (error) {
+                console.error('[SW] Failed to sync calculation:', calculation.id, error);
+            }
+        }
+    } catch (error) {
+        console.error('[SW] Calculations sync failed:', error);
+    }
+}
+
+/**
+ * Busca cálculos pendentes (simulado)
+ */
+async function getPendingCalculations() {
+    // Em uma implementação real, buscaria do IndexedDB
+    return [];
+}
+
+/**
+ * Remove cálculo pendente (simulado)
+ */
+async function removePendingCalculation(id) {
+    // Em uma implementação real, removeria do IndexedDB
+    console.log('[SW] Removed pending calculation:', id);
+}
+
+/**
+ * Push notifications
+ */
+self.addEventListener('push', (event) => {
+    console.log('[SW] Push received:', event);
+    
+    const options = {
+        body: event.data ? event.data.text() : 'Nova notificação do Sistema Madeiras',
+        icon: '/assets/images/icon-192.png',
+        badge: '/assets/images/badge-72.png',
+        vibrate: [200, 100, 200],
+        data: {
+            timestamp: Date.now()
+        },
+        actions: [
+            {
+                action: 'view',
+                title: 'Ver Detalhes',
+                icon: '/assets/images/view-icon.png'
+            },
+            {
+                action: 'dismiss',
+                title: 'Dispensar',
+                icon: '/assets/images/dismiss-icon.png'
+            }
+        ]
+    };
+    
+    event.waitUntil(
+        self.registration.showNotification('Sistema Madeiras Logística', options)
+    );
+});
+
+/**
+ * Clique em notificação
+ */
+self.addEventListener('notificationclick', (event) => {
+    console.log('[SW] Notification click:', event);
+    
+    event.notification.close();
+    
+    if (event.action === 'view') {
+        event.waitUntil(
+            clients.openWindow('/dashboard.html')
+        );
+    } else if (event.action === 'dismiss') {
+        // Notification já foi fechada
+        return;
+    } else {
+        // Clique no corpo da notificação
+        event.waitUntil(
+            clients.openWindow('/')
+        );
+    }
+});
+
+/**
+ * Mensagens do cliente
+ */
+self.addEventListener('message', (event) => {
+    console.log('[SW] Message received:', event.data);
+    
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+        return;
+    }
+    
+    if (event.data && event.data.type === 'CACHE_CALCULATION') {
+        cacheCalculation(event.data.calculation);
+        return;
+    }
+    
+    if (event.data && event.data.type === 'REQUEST_SYNC') {
+        // Registrar sync para execução em background
+        self.registration.sync.register('sync-data');
+        return;
+    }
+});
+
+/**
+ * Cache de cálculo individual
+ */
+async function cacheCalculation(calculation) {
+    try {
+        const cache = await caches.open(DATA_CACHE_NAME);
+        const response = new Response(JSON.stringify(calculation), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        await cache.put(`/calculations/${calculation.id}`, response);
+        console.log('[SW] Calculation cached:', calculation.id);
+    } catch (error) {
+        console.error('[SW] Failed to cache calculation:', error);
+    }
+}
+
+/**
+ * Periodicamente limpa cache antigo
+ */
+setInterval(() => {
+    cleanupOldCaches();
+}, 24 * 60 * 60 * 1000); // A cada 24 horas
+
+/**
+ * Monitoramento de uso de quota de storage
+ */
+if ('storage' in navigator && 'estimate' in navigator.storage) {
+    navigator.storage.estimate().then(estimate => {
+        const percentUsed = (estimate.usage / estimate.quota) * 100;
+        console.log(`[SW] Storage usado: ${percentUsed.toFixed(2)}%`);
+        
+        // Alertar se uso > 80%
+        if (percentUsed > 80) {
+            console.warn('[SW] Alto uso de storage, considere limpeza');
+        }
+    });
+}
+
+console.log('[SW] Service Worker carregado e configurado');

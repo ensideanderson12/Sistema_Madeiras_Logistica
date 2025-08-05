@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Madeiras Logística - Dashboard de Transparência</title>
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2E7D32">
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <h1>📊 Sistema Madeiras Logística</h1>
+            <nav>
+                <a href="#dashboard" class="nav-link active">Dashboard</a>
+                <a href="#calculator" class="nav-link">Calculadora</a>
+                <a href="#reports" class="nav-link">Relatórios</a>
+                <a href="#settings" class="nav-link">Configurações</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <!-- KPIs em Tempo Real -->
+            <section id="kpis" class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>💰 Receita Total</h3>
+                    <div class="kpi-value" id="total-revenue">R$ 0,00</div>
+                    <div class="kpi-change positive">+12.5%</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>🚛 Operações Ativas</h3>
+                    <div class="kpi-value" id="active-operations">0</div>
+                    <div class="kpi-change positive">+3</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>📈 ROI Médio</h3>
+                    <div class="kpi-value" id="average-roi">0%</div>
+                    <div class="kpi-change negative">-2.1%</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>⛽ Custo Combustível</h3>
+                    <div class="kpi-value" id="fuel-cost">R$ 0,00</div>
+                    <div class="kpi-change positive">-5.3%</div>
+                </div>
+            </section>
+
+            <!-- Calculadora de Transparência -->
+            <section id="calculator" class="calculator-section">
+                <h2>🧮 Calculadora de Transparência (Modelo 70/30)</h2>
+                <div class="calculator-grid">
+                    <div class="input-group">
+                        <label for="route-distance">Distância da Rota (km)</label>
+                        <input type="number" id="route-distance" placeholder="Ex: 500" min="1">
+                        <span class="tooltip">Distância total ida e volta</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="fuel-price">Preço Combustível (R$/L)</label>
+                        <input type="number" id="fuel-price" placeholder="Ex: 5.50" step="0.01" min="0">
+                        <span class="tooltip">Preço atual do diesel</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="cargo-weight">Peso da Carga (ton)</label>
+                        <input type="number" id="cargo-weight" placeholder="Ex: 25" step="0.1" min="0">
+                        <span class="tooltip">Peso total da madeira</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="wood-price">Preço da Madeira (R$/m³)</label>
+                        <input type="number" id="wood-price" placeholder="Ex: 150.00" step="0.01" min="0">
+                        <span class="tooltip">Preço por metro cúbico</span>
+                    </div>
+                </div>
+                
+                <button id="calculate-btn" class="calculate-button">🔢 Calcular Transparência</button>
+                
+                <div id="results" class="results-section" style="display: none;">
+                    <h3>📊 Resultados do Cálculo</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <label>Custo Total Operação:</label>
+                            <span id="total-cost">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <label>Receita Bruta:</label>
+                            <span id="gross-revenue">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <label>Margem Operacional (70%):</label>
+                            <span id="operational-margin">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <label>Reserva Estratégica (30%):</label>
+                            <span id="strategic-reserve">R$ 0,00</span>
+                        </div>
+                        <div class="result-item highlight">
+                            <label>ROI Projetado:</label>
+                            <span id="projected-roi">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gráficos e Análises -->
+            <section id="charts" class="charts-section">
+                <h2>📈 Análises e Tendências</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costs-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/calculator.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="modules/pwa-service-worker.js"></script>
+</body>
+</html>
