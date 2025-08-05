@@ -1,0 +1,82 @@
+Categoria,Item,Valor,Unidade,Observações
+DADOS OPERAÇÃO,Data Análise,04/08/2025,,
+DADOS OPERAÇÃO,CEO,ensideanderson12,,
+DADOS OPERAÇÃO,Base Operacional,Araçatuba-SP,,
+DADOS OPERAÇÃO,Origem,Mandirituba/PR,,
+DADOS OPERAÇÃO,Destino,Rio Pomba/MG,,
+DADOS OPERAÇÃO,Distância,1319,km,Rota Sul-Sudeste
+DADOS OPERAÇÃO,Tempo Estimado,18,horas,Incluindo paradas
+,,,,
+PRODUTOS,Pinus Convencional - Volume,28,m³,53.8% do total
+PRODUTOS,Pinus Convencional - Preço,1170,R$/m³,
+PRODUTOS,Pinus Convencional - Dimensões,2.0x30x3.00,metros,
+PRODUTOS,Pinus Convencional - Valor Total,32760,R$,=28*1170
+PRODUTOS,Pinus Seco - Volume,24,m³,46.2% do total
+PRODUTOS,Pinus Seco - Preço,950,R$/m³,
+PRODUTOS,Pinus Seco - Variações,7+7+5+5,m³,Diferentes lotes
+PRODUTOS,Pinus Seco - Valor Total,22800,R$,=24*950
+PRODUTOS,Volume Total,52,m³,=28+24
+PRODUTOS,Valor Total Produtos,55560,R$,=32760+22800
+,,,,
+LOGÍSTICA,Frete Contratado,11000,R$,
+LOGÍSTICA,Custo por km,8.33,R$/km,=11000/1319
+LOGÍSTICA,Pedágios,285,R$,
+LOGÍSTICA,Combustível,2640,R$,450L x R$5.87
+LOGÍSTICA,Motorista,1800,R$,Diárias + ajudas
+LOGÍSTICA,Seguro,275,R$,
+LOGÍSTICA,Outros Custos,6000,R$,
+LOGÍSTICA,Custo Frete por m³,211.54,R$/m³,=11000/52
+,,,,
+TRANSPARÊNCIA,Custo Total Operação,66560,R$,=55560+11000
+TRANSPARÊNCIA,Margem Transparente,15,%,
+TRANSPARÊNCIA,Margem Aplicada,9984,R$,=66560*0.15
+TRANSPARÊNCIA,Preço Final Cliente,76544,R$,=66560+9984
+TRANSPARÊNCIA,Preço por m³ Cliente,1472,R$/m³,=76544/52
+,,,,
+DIVISÃO LUCRO,Lucro Excedente,9984,R$,Margem transparente
+DIVISÃO LUCRO,Divisão Fornecedor,70,%,
+DIVISÃO LUCRO,Lucro Fornecedor,6989,R$,=9984*0.70
+DIVISÃO LUCRO,Lucro Sistema,2995,R$,=9984*0.30
+DIVISÃO LUCRO,Receita Total Fornecedor,62549,R$,=55560+6989
+DIVISÃO LUCRO,ROI Fornecedor,12.6,%,=(6989/55560)*100
+,,,,
+TRANSPORTADORAS,TransLog Sul-Sudeste,10800,R$,Recomendada
+TRANSPORTADORAS,TransLog - Avaliação,4.8,/5,15 anos experiência
+TRANSPORTADORAS,TransLog - Tempo,17,horas,
+TRANSPORTADORAS,Madeira Express,11200,R$,
+TRANSPORTADORAS,Madeira Express - Avaliação,4.6,/5,12 anos experiência
+TRANSPORTADORAS,Madeira Express - Tempo,18,horas,
+TRANSPORTADORAS,Rota Verde,11500,R$,
+TRANSPORTADORAS,Rota Verde - Avaliação,4.4,/5,8 anos experiência
+TRANSPORTADORAS,Rota Verde - Tempo,19,horas,
+,,,,
+COMPARATIVO,Modelo Tradicional - Margem,25,%,Padrão mercado
+COMPARATIVO,Modelo Tradicional - Receita Fornecedor,55560,R$,Apenas valor base
+COMPARATIVO,Modelo Transparente - Margem,15,%,Nossa proposta
+COMPARATIVO,Modelo Transparente - Receita Fornecedor,62549,R$,Base + participação
+COMPARATIVO,Vantagem Modelo Transparente,6989,R$,=62549-55560
+COMPARATIVO,Percentual Vantagem,12.6,%,=(6989/55560)*100
+,,,,
+EFICIÊNCIA,Custo Nacional Médio,10.5,R$/km,
+EFICIÊNCIA,Nossa Eficiência,8.33,R$/km,
+EFICIÊNCIA,Economia Percentual,20.7,%,=((10.5-8.33)/10.5)*100
+EFICIÊNCIA,Posição Mercado,Excelente,,21% abaixo média
+,,,,
+CENÁRIOS,Conservador - Volume Mensal,55,m³,Próximos 6 meses
+CENÁRIOS,Conservador - Receita Fornecedor,66000,R$/mês,
+CENÁRIOS,Otimista - Volume Mensal,90,m³,Próximos 12 meses
+CENÁRIOS,Otimista - Receita Fornecedor,108000,R$/mês,
+,,,,
+KPIS,Pontualidade Meta,95,%,Entregas no prazo
+KPIS,Avarias Meta,1,%,Máximo aceitável
+KPIS,Custo km Meta,9,R$/km,Limite superior
+KPIS,Tempo Ciclo Meta,20,horas,Máximo aceitável
+KPIS,Satisfação Fornecedor Meta,4.5,/5,Mínimo exigido
+KPIS,NPS Clientes Meta,70,pontos,Net Promoter Score
+KPIS,Taxa Retenção Meta,90,%,Clientes/fornecedores
+,,,,
+CRONOGRAMA,Validação com Fornecedor,2,dias,
+CRONOGRAMA,Contratação Transportadora,3,dias,
+CRONOGRAMA,Primeira Operação,5,dias,
+CRONOGRAMA,Dashboard Específico,7,dias,
+CRONOGRAMA,Avaliação Resultados,15,dias,
